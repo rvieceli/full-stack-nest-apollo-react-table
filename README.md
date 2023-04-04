@@ -49,6 +49,10 @@ Write a new query `getTracks` for retrieving a list of tracks from the database.
 
 ### Challenge 2
 
+See `frontend/README.md` for details.
+
+### Challenge 3 (**OPTIONAL**)
+
 Add the `artist` field to the previous challenge's response model using a [NestJS field resolver](https://docs.nestjs.com/graphql/resolvers).
 
 **BONUS**: Adding the field using this method will require N+1 queries to the database, one for each artist. Install and configure [nestjs-dataloader](https://www.npmjs.com/package/nestjs-dataloader) to make sure all the artists are fetched using a single query.

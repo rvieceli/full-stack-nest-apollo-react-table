@@ -28,14 +28,14 @@ Write a new query `getTracks` for retrieving a list of tracks from the database.
 
 #### Query parameters
 
-| name       | description                            |
-| ---------- | -------------------------------------- |
-| artistName | **Name** of the artist.                |
-| genreName  | **Name** of the track genre.           |
-| minPrice   | Minimum price of the track, inclusive. |
-| maxPrice   | Maximum price of the track, exclusive. |
-| page       | Index of the required page.            |
-| pageSize   | Size of the pages.                     |
+| name       | description                                   |
+| ---------- | --------------------------------------------- |
+| artistName | **Name** of the track's artist.               |
+| genreName  | **Name** of the track's genre.                |
+| minPrice   | Minimum price of the track, inclusive.        |
+| maxPrice   | Maximum price of the track, exclusive.        |
+| page       | Index of the requested page, starting from 0. |
+| pageSize   | Size of a single page.                        |
 
 #### Response format
 

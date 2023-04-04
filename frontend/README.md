@@ -1,6 +1,6 @@
 # full-stack-interview
 
-This folder contains the frontend part of the World of V interview challenge. Included in the folder is a working react app server based on [Create React App](https://create-react-app.dev/).
+This folder contains the frontend part of the World of V interview challenge. Included in the folder is a working react app based on [Create React App](https://create-react-app.dev/).
 
 ## Installation
 

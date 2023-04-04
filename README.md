@@ -49,7 +49,7 @@ Write a new query `getTracks` for retrieving a list of tracks from the database.
 
 ### Challenge 2
 
-See `frontend/README.md` for details.
+See [frontend/README.md](frontend/README.md) for details.
 
 ### Challenge 3 (**OPTIONAL**)
 

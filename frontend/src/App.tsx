@@ -1,9 +1,7 @@
 function App() {
   return (
     <div className="App">
-      <span>
-        <b>YOUR CODE HERE</b>
-      </span>
+      <p>YOUR CODE HERE</p>
     </div>
   );
 }

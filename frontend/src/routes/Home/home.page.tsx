@@ -1,5 +1,3 @@
-import { useQuery } from '@apollo/client';
-
 import {
   ColumnFiltersState,
   flexRender,
@@ -7,7 +5,6 @@ import {
   getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import { document } from './document.graphql';
 import {
   Center,
   Flex,
@@ -15,83 +12,43 @@ import {
   GridItem,
   Heading,
   Table,
+  TableContainer,
   Tbody,
   Td,
   Th,
   Thead,
   Tr,
 } from '@chakra-ui/react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Pagination } from '../../components/Pagination';
 
-import { numberOrUndefined } from '../../utils/numberOrUndefined';
-import { atLeastOneOrUndefined } from '../../utils/atLeastOneOrUndefined';
-
 import { columns } from './columns';
+import { usePagination } from '../../hooks/usePagination';
+import { useTracksData } from './useTracksData';
+import { useGetFromCssMap } from '../../hooks/useGetFromCssMap';
 
 export function HomePage() {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-
-  const location = useLocation();
-  const navigate = useNavigate();
-
-  const queryParams = useMemo(
-    () => new URLSearchParams(location.search),
-    [location.search],
-  );
-
-  const page = (Number(queryParams.get('page')) || 1) - 1;
-  const pageSize = Number(queryParams.get('pageSize')) || 10;
-
-  const { data } = useQuery(document, {
-    variables: {
-      page,
-      pageSize,
-      artistName: atLeastOneOrUndefined(queryParams.get('artist_name')),
-      genreName: atLeastOneOrUndefined(queryParams.get('genre')),
-      minPrice: numberOrUndefined(queryParams.get('minPrice')),
-      maxPrice: numberOrUndefined(queryParams.get('maxPrice')),
-    },
-  });
+  const [pageIndex, pageSize] = usePagination();
+  const data = useTracksData();
+  const backgroundColor = useGetFromCssMap('colors.chakra-body-bg');
 
   const table = useReactTable({
     data: data?.getTracks.items ?? [],
     state: {
       columnFilters,
-    },
-    columns,
-    initialState: {
       pagination: {
-        pageIndex: page,
+        pageIndex,
         pageSize,
       },
     },
+    columns,
     manualPagination: true,
     pageCount: data?.getTracks.pageInfo.totalPages ?? 1,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
-
-  const pagination = table.getState().pagination;
-
-  useEffect(() => {
-    const page = (pagination.pageIndex + 1).toString();
-    const pageSize = pagination.pageSize.toString();
-
-    if (
-      queryParams.get('page') === page &&
-      queryParams.get('pageSize') === pageSize
-    ) {
-      return;
-    }
-
-    queryParams.set('page', page);
-    queryParams.set('pageSize', pageSize);
-
-    navigate({ search: queryParams.toString() });
-  }, [navigate, pagination.pageIndex, pagination.pageSize, queryParams]);
 
   return (
     <Grid
@@ -102,6 +59,7 @@ export function HomePage() {
       gap="1"
       flexGrow={1}
       minH="100vh"
+      maxH="100vh"
     >
       <GridItem
         area="header"
@@ -112,9 +70,9 @@ export function HomePage() {
       >
         <Heading>Tracks</Heading>
       </GridItem>
-      <GridItem area="data">
-        <Table variant="striped" size="sm">
-          <Thead>
+      <GridItem area="data" as={TableContainer} overflowY="auto">
+        <Table variant="striped" size="sm" position="relative">
+          <Thead position="sticky" top={0} boxShadow="lg" bg={backgroundColor}>
             {table.getHeaderGroups().map((headerGroup) => (
               <Tr key={headerGroup.id}>
                 {headerGroup.headers.map((header) => (
@@ -145,14 +103,9 @@ export function HomePage() {
       </GridItem>
       <GridItem area="footer" as={Center}>
         <Pagination
-          pagination={pagination}
           pageCount={table.getPageCount()}
           canPreviousPage={table.getCanPreviousPage()}
           canNextPage={table.getCanNextPage()}
-          setPageIndex={table.setPageIndex}
-          previousPage={table.previousPage}
-          nextPage={table.nextPage}
-          setPageSize={table.setPageSize}
         />
       </GridItem>
     </Grid>

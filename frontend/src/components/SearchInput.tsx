@@ -1,22 +1,16 @@
 import { HeaderContext } from '@tanstack/react-table';
 import { HStack, Input, InputProps, Text } from '@chakra-ui/react';
 import { useDebouncedCallback } from 'use-debounce';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { useMemo } from 'react';
-import { camelCase } from '../utils/camelCase';
+import { useQueryParams } from '../context/QueryParams.context';
+import { useNavigate } from 'react-router-dom';
 
 export function SearchInput({
   columnId,
   wait = 500,
   ...props
 }: InputProps & { wait?: number; columnId: string }) {
-  const location = useLocation();
+  const queryParams = useQueryParams();
   const navigate = useNavigate();
-
-  const queryParams = useMemo(
-    () => new URLSearchParams(location.search),
-    [location.search],
-  );
 
   const defaultValue = queryParams.get(columnId) || undefined;
 
@@ -32,6 +26,8 @@ export function SearchInput({
     } else {
       queryParams.set(columnId, value);
     }
+
+    queryParams.set('page', '1');
 
     navigate({ search: queryParams.toString() });
   }, wait);

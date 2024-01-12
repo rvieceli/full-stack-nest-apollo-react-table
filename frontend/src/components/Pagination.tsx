@@ -7,29 +7,44 @@ import {
   Select,
   Text,
 } from '@chakra-ui/react';
-import { PaginationState } from '@tanstack/react-table';
 import { useDebouncedCallback } from 'use-debounce';
+import { usePagination } from '../hooks/usePagination';
+import { useQueryParams } from '../context/QueryParams.context';
+import { useNavigate } from 'react-router-dom';
 
 export function Pagination({
-  pagination,
   pageCount,
   canPreviousPage,
   canNextPage,
-  setPageIndex,
-  previousPage,
-  nextPage,
-  setPageSize,
 }: {
-  pagination: PaginationState;
   pageCount: number;
   canPreviousPage: boolean;
   canNextPage: boolean;
-  setPageIndex: (pageIndex: number) => void;
-  previousPage: () => void;
-  nextPage: () => void;
-  setPageSize: (pageSize: number) => void;
 }) {
+  const queryParams = useQueryParams();
+  const [pageIndex, pageSize] = usePagination();
+  const navigate = useNavigate();
+
+  const setPageIndex = (pageIndex: number) => {
+    queryParams.set('page', (pageIndex + 1).toString());
+    navigate({ search: queryParams.toString() });
+  };
+
   const handleDebouncedSetPageIndex = useDebouncedCallback(setPageIndex, 500);
+
+  function previousPage() {
+    if (!canPreviousPage) return;
+    setPageIndex(pageIndex - 1);
+  }
+  function nextPage() {
+    if (!canNextPage) return;
+    setPageIndex(pageIndex + 1);
+  }
+
+  const setPageSize = (pageSize: number) => {
+    queryParams.set('pageSize', pageSize.toString());
+    navigate({ search: queryParams.toString() });
+  };
 
   return (
     <Flex gap="4" alignItems="center" justifyContent="center" flex="1">
@@ -37,10 +52,10 @@ export function Pagination({
         <Button onClick={() => setPageIndex(0)} isDisabled={!canPreviousPage}>
           {'<<'}
         </Button>
-        <Button onClick={() => previousPage()} isDisabled={!canPreviousPage}>
+        <Button onClick={previousPage} isDisabled={!canPreviousPage}>
           {'<'}
         </Button>
-        <Button onClick={() => nextPage()} isDisabled={!canNextPage}>
+        <Button onClick={nextPage} isDisabled={!canNextPage}>
           {'>'}
         </Button>
         <Button
@@ -53,13 +68,13 @@ export function Pagination({
       <Flex alignItems="center" gap="2">
         <Box>Page</Box>
         <Text as="b">
-          {pagination.pageIndex + 1} of {pageCount}
+          {pageIndex + 1} of {pageCount}
         </Text>
       </Flex>
       <Flex alignItems="center" gap="2" minW="10rem">
         <Text>Go to page:</Text>
         <NumberInput
-          defaultValue={pagination.pageIndex + 1}
+          defaultValue={pageIndex + 1}
           min={1}
           max={pageCount}
           onChange={(value, valueAsNumber) => {
@@ -77,7 +92,7 @@ export function Pagination({
       <Box>
         <Select
           display={'inline'}
-          value={pagination.pageSize}
+          value={pageSize}
           onChange={(e) => {
             setPageSize(Number(e.target.value));
           }}

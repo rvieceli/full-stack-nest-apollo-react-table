@@ -1,5 +1,5 @@
 import { ArgsType, Field, Float, Int, ObjectType } from '@nestjs/graphql';
-import { IsOptional, MinLength } from 'class-validator';
+import { IsOptional, IsString, MinLength, isString } from 'class-validator';
 import { Artist } from '../artist/artist.model';
 import { PageInfo, PaginationArgs } from 'src/common/models/page-info.model';
 
@@ -41,7 +41,7 @@ export class GetTracksArgs extends PaginationArgs {
     description: "Name of the track's artist. Min length: 2.",
   })
   @IsOptional()
-  @MinLength(2)
+  @IsString()
   artistName?: string;
 
   @Field(() => String, {
@@ -49,7 +49,7 @@ export class GetTracksArgs extends PaginationArgs {
     description: "Name of the track's genre. Min length: 2.",
   })
   @IsOptional()
-  @MinLength(2)
+  @IsString()
   genreName?: string;
 
   @Field(() => Float, {

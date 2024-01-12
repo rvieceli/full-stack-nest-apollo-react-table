@@ -32,7 +32,7 @@ export function Pagination({
   const handleDebouncedSetPageIndex = useDebouncedCallback(setPageIndex, 500);
 
   return (
-    <Flex gap="4" alignItems="center" justifyContent="center" mt="6">
+    <Flex gap="4" alignItems="center" justifyContent="center" flex="1">
       <Flex gap="2">
         <Button onClick={() => setPageIndex(0)} isDisabled={!canPreviousPage}>
           {'<<'}
@@ -50,13 +50,13 @@ export function Pagination({
           {'>>'}
         </Button>
       </Flex>
-      <Flex alignItems="center" gap="1">
+      <Flex alignItems="center" gap="2">
         <Box>Page</Box>
         <Text as="b">
           {pagination.pageIndex + 1} of {pageCount}
         </Text>
       </Flex>
-      <Flex alignItems="center" gap="1" minW="10rem">
+      <Flex alignItems="center" gap="2" minW="10rem">
         <Text>Go to page:</Text>
         <NumberInput
           defaultValue={pagination.pageIndex + 1}
@@ -69,8 +69,8 @@ export function Pagination({
         >
           <NumberInputField
             w="16"
-            paddingInlineEnd={1}
-            paddingInlineStart={1}
+            paddingInlineEnd="2"
+            paddingInlineStart="2"
           />
         </NumberInput>
       </Flex>

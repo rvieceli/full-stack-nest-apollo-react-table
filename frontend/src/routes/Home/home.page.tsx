@@ -1,57 +1,38 @@
 import { useQuery } from '@apollo/client';
 
 import {
-  createColumnHelper,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
   getPaginationRowModel,
   useReactTable,
 } from '@tanstack/react-table';
 import { document } from './document.graphql';
-import { Track } from '../../lib/gql/graphql';
 import {
+  Center,
   Flex,
+  Grid,
+  GridItem,
   Heading,
   Table,
   Tbody,
   Td,
-  Tfoot,
   Th,
   Thead,
   Tr,
 } from '@chakra-ui/react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Pagination } from '../../components/Pagination';
-import { humanizeMinutes } from '../../utils/humanizeMinutes';
-import { formatCurrencyWithoutSymbol } from '../../utils/formatCurrency';
 
-const columnHelper = createColumnHelper<Track>();
+import { numberOrUndefined } from '../../utils/numberOrUndefined';
+import { atLeastOneOrUndefined } from '../../utils/atLeastOneOrUndefined';
 
-const columns = [
-  columnHelper.accessor('id', {
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor('name', {
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor('genre', {
-    cell: (info) => info.getValue(),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor('price', {
-    cell: (info) => formatCurrencyWithoutSymbol(info.getValue()),
-    footer: (info) => info.column.id,
-  }),
-  columnHelper.accessor('duration', {
-    cell: (info) => humanizeMinutes(info.getValue()),
-    footer: (info) => info.column.id,
-  }),
-];
+import { columns } from './columns';
 
 export function HomePage() {
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -59,6 +40,7 @@ export function HomePage() {
     () => new URLSearchParams(location.search),
     [location.search],
   );
+
   const page = (Number(queryParams.get('page')) || 1) - 1;
   const pageSize = Number(queryParams.get('pageSize')) || 10;
 
@@ -66,11 +48,18 @@ export function HomePage() {
     variables: {
       page,
       pageSize,
+      artistName: atLeastOneOrUndefined(queryParams.get('artist_name')),
+      genreName: atLeastOneOrUndefined(queryParams.get('genre')),
+      minPrice: numberOrUndefined(queryParams.get('minPrice')),
+      maxPrice: numberOrUndefined(queryParams.get('maxPrice')),
     },
   });
 
   const table = useReactTable({
     data: data?.getTracks.items ?? [],
+    state: {
+      columnFilters,
+    },
     columns,
     initialState: {
       pagination: {
@@ -80,7 +69,7 @@ export function HomePage() {
     },
     manualPagination: true,
     pageCount: data?.getTracks.pageInfo.totalPages ?? 1,
-
+    onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
   });
@@ -100,70 +89,72 @@ export function HomePage() {
 
     queryParams.set('page', page);
     queryParams.set('pageSize', pageSize);
+
     navigate({ search: queryParams.toString() });
   }, [navigate, pagination.pageIndex, pagination.pageSize, queryParams]);
 
   return (
-    <div>
-      <Flex p="4">
+    <Grid
+      templateAreas={`"header"
+                    "data"
+                    "footer"`}
+      gridTemplateRows={'6rem 1fr 4rem'}
+      gap="1"
+      flexGrow={1}
+      minH="100vh"
+    >
+      <GridItem
+        area="header"
+        as={Flex}
+        alignItems="center"
+        justifyItems="center"
+        pl="4"
+      >
         <Heading>Tracks</Heading>
-      </Flex>
-      <Table variant="striped" colorScheme="blue" size="sm">
-        <Thead>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <Tr key={headerGroup.id}>
-              {headerGroup.headers.map((header) => (
-                <Th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext(),
-                      )}
-                </Th>
-              ))}
-            </Tr>
-          ))}
-        </Thead>
-        <Tbody>
-          {table.getRowModel().rows.map((row) => (
-            <Tr key={row.id}>
-              {row.getVisibleCells().map((cell) => (
-                <Td key={cell.id}>
-                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                </Td>
-              ))}
-            </Tr>
-          ))}
-        </Tbody>
-        <Tfoot>
-          {table.getFooterGroups().map((footerGroup) => (
-            <Tr key={footerGroup.id}>
-              {footerGroup.headers.map((header) => (
-                <Th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.footer,
-                        header.getContext(),
-                      )}
-                </Th>
-              ))}
-            </Tr>
-          ))}
-        </Tfoot>
-      </Table>
-
-      <Pagination
-        pagination={pagination}
-        pageCount={table.getPageCount()}
-        canPreviousPage={table.getCanPreviousPage()}
-        canNextPage={table.getCanNextPage()}
-        setPageIndex={table.setPageIndex}
-        previousPage={table.previousPage}
-        nextPage={table.nextPage}
-        setPageSize={table.setPageSize}
-      />
-    </div>
+      </GridItem>
+      <GridItem area="data">
+        <Table variant="striped" size="sm">
+          <Thead>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <Tr key={headerGroup.id}>
+                {headerGroup.headers.map((header) => (
+                  <Th key={header.id}>
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </Th>
+                ))}
+              </Tr>
+            ))}
+          </Thead>
+          <Tbody>
+            {table.getRowModel().rows.map((row) => (
+              <Tr key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <Td key={cell.id}>
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </Td>
+                ))}
+              </Tr>
+            ))}
+          </Tbody>
+        </Table>
+      </GridItem>
+      <GridItem area="footer" as={Center}>
+        <Pagination
+          pagination={pagination}
+          pageCount={table.getPageCount()}
+          canPreviousPage={table.getCanPreviousPage()}
+          canNextPage={table.getCanNextPage()}
+          setPageIndex={table.setPageIndex}
+          previousPage={table.previousPage}
+          nextPage={table.nextPage}
+          setPageSize={table.setPageSize}
+        />
+      </GridItem>
+    </Grid>
   );
 }

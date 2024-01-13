@@ -9,8 +9,7 @@ import {
 } from '@chakra-ui/react';
 import { useDebouncedCallback } from 'use-debounce';
 import { usePagination } from '../hooks/usePagination';
-import { useQueryParams } from '../context/QueryParams.context';
-import { useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 
 export function Pagination({
   pageCount,
@@ -21,13 +20,11 @@ export function Pagination({
   canPreviousPage: boolean;
   canNextPage: boolean;
 }) {
-  const queryParams = useQueryParams();
   const [pageIndex, pageSize] = usePagination();
-  const navigate = useNavigate();
-
+  const [searchParams, setSearchParams] = useSearchParams();
   const setPageIndex = (pageIndex: number) => {
-    queryParams.set('page', (pageIndex + 1).toString());
-    navigate({ search: queryParams.toString() });
+    searchParams.set('page', (pageIndex + 1).toString());
+    setSearchParams(searchParams);
   };
 
   const handleDebouncedSetPageIndex = useDebouncedCallback(setPageIndex, 500);
@@ -42,8 +39,8 @@ export function Pagination({
   }
 
   const setPageSize = (pageSize: number) => {
-    queryParams.set('pageSize', pageSize.toString());
-    navigate({ search: queryParams.toString() });
+    searchParams.set('pageSize', pageSize.toString());
+    setSearchParams(searchParams);
   };
 
   return (

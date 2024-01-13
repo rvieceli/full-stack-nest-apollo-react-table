@@ -4,21 +4,21 @@ import { document } from './document.graphql';
 import { numberOrUndefined } from '../../utils/numberOrUndefined';
 import { atLeastOneOrUndefined } from '../../utils/atLeastOneOrUndefined';
 import { usePagination } from '../../hooks/usePagination';
-import { useQueryParams } from '../../context/QueryParams.context';
 import { usePreviousData } from '../../hooks/usePreviousData';
+import { useSearchParams } from 'react-router-dom';
 
 export function useTracksData() {
-  const queryParams = useQueryParams();
+  const [searchParams] = useSearchParams();
   const [pageIndex, pageSize] = usePagination();
 
   const { data, loading } = useQuery(document, {
     variables: {
       page: pageIndex,
       pageSize,
-      artistName: atLeastOneOrUndefined(queryParams.get('artist_name')),
-      genreName: atLeastOneOrUndefined(queryParams.get('genre')),
-      minPrice: numberOrUndefined(queryParams.get('minPrice')),
-      maxPrice: numberOrUndefined(queryParams.get('maxPrice')),
+      artistName: atLeastOneOrUndefined(searchParams.get('artist_name')),
+      genreName: atLeastOneOrUndefined(searchParams.get('genre')),
+      minPrice: numberOrUndefined(searchParams.get('minPrice')),
+      maxPrice: numberOrUndefined(searchParams.get('maxPrice')),
     },
     fetchPolicy: 'cache-and-network',
   });

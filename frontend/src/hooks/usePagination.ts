@@ -1,10 +1,10 @@
-import { useQueryParams } from '../context/QueryParams.context';
+import { useSearchParams } from 'react-router-dom';
 
 export function usePagination() {
-  const queryParams = useQueryParams();
+  const [searchParams] = useSearchParams();
 
-  const page = (Number(queryParams.get('page')) || 1) - 1;
-  const pageSize = Number(queryParams.get('pageSize')) || 10;
+  const page = (Number(searchParams.get('page')) || 1) - 1;
+  const pageSize = Number(searchParams.get('pageSize')) || 10;
 
   return [page, pageSize];
 }

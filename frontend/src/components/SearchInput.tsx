@@ -1,7 +1,17 @@
 import { HeaderContext } from '@tanstack/react-table';
-import { HStack, Input, InputProps, Text } from '@chakra-ui/react';
+import {
+  HStack,
+  IconButton,
+  Input,
+  InputGroup,
+  InputProps,
+  InputRightAddon,
+  Text,
+} from '@chakra-ui/react';
+import { CloseIcon, SearchIcon } from '@chakra-ui/icons';
 import { useDebouncedCallback } from 'use-debounce';
 import { useSearchParams } from 'react-router-dom';
+import { useRef } from 'react';
 
 export function SearchInput({
   columnId,
@@ -9,6 +19,7 @@ export function SearchInput({
   ...props
 }: InputProps & { wait?: number; columnId: string }) {
   const [searchParams, setSearchParams] = useSearchParams();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const defaultValue = searchParams.get(columnId) || undefined;
 
@@ -32,15 +43,32 @@ export function SearchInput({
     setSearchParams(searchParams);
   }, wait);
 
+  function handleClear() {
+    if (inputRef.current) {
+      inputRef.current.value = '';
+    }
+    searchParams.delete(columnId);
+    setSearchParams(searchParams);
+  }
+
   return (
-    <Input
-      role="search"
-      defaultValue={defaultValue}
-      size="xs"
-      placeholder="Search"
-      {...props}
-      onChange={handleDebouncedOnChange}
-    />
+    <InputGroup size="xs" {...props}>
+      <Input
+        ref={inputRef}
+        role="search"
+        defaultValue={defaultValue}
+        size="xs"
+        placeholder="Search"
+        onChange={handleDebouncedOnChange}
+      />
+      <InputRightAddon
+        as={IconButton}
+        isDisabled={!defaultValue}
+        onClick={handleClear}
+        aria-label="clear filter"
+        icon={defaultValue ? <CloseIcon boxSize="2" /> : <SearchIcon />}
+      />
+    </InputGroup>
   );
 }
 
